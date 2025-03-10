@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  email          String   @unique
+  fullname       String
+  password       String
+  profilePicture String?
+  phone          String
+  points         Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  // Relations
+  donations             Donation[]
+  comments              Comment[]
+  likes                 Like[]
+  events                Event[] // Events organized by this user
+  followedCharities     CharityFollow[] // Charities this user follows
+  volunteerApplications VolunteerUser[] // Volunteer positions applied for
+}
+
+model Charity {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?
+  logo         String?
+  coverPicture String?
+  email        String   @unique
+  password     String
+  phone        String
+  location     String?  @default("Ethiopia")
+  website      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  donations             Donation[]
+  events                Event[]
+  volunteerApplications VolunteerApplication[]
+  followers             CharityFollow[] // Users following this charity
+}
+
+model CharityFollow {
+  userId     String
+  charityId  String
+  followedAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charity Charity @relation(fields: [charityId], references: [id], onDelete: Cascade)
+
+  @@id([userId, charityId]) // Composite primary key
+  @@index([userId])
+  @@index([charityId])
+}
+
+model Donation {
+  id        String   @id @default(uuid())
+  amount    Float
+  message   String?
+  createdAt DateTime @default(now())
+
+  userId    String
+  charityId String
+  eventId   String?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  charity Charity @relation(fields: [charityId], references: [id], onDelete: Cascade)
+  event   Event?  @relation(fields: [eventId], references: [id])
+
+  @@index([userId])
+  @@index([charityId])
+  @@index([eventId])
+}
+
+model Event {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  targetAmount  Float
+  currentAmount Float    @default(0)
+  startDate     DateTime @default(now())
+  endDate       DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  organizerId String
+  charityId   String
+
+  organizer User       @relation(fields: [organizerId], references: [id])
+  charity   Charity    @relation(fields: [charityId], references: [id])
+  donations Donation[]
+  comments  Comment[]
+  likes     Like[]
+
+  @@index([organizerId])
+  @@index([charityId])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  userId  String
+  eventId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId]) // Prevent duplicate likes
+  @@index([userId])
+  @@index([eventId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId  String
+  eventId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([eventId])
+}
+
+model VolunteerApplication {
+  id          String   @id @default(uuid())
+  title       String
+  position    String
+  description String?
+  location    String
+  startDate   DateTime @default(now())
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  charityId  String
+  charity    Charity         @relation(fields: [charityId], references: [id], onDelete: Cascade)
+  applicants VolunteerUser[]
+
+  @@index([charityId])
+}
+
+model VolunteerUser {
+  userId          String
+  volunteerAppId  String
+  applicationDate DateTime          @default(now())
+  status          ApplicationStatus @default(PENDING)
+
+  user                 User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  volunteerApplication VolunteerApplication @relation(fields: [volunteerAppId], references: [id], onDelete: Cascade)
+
+  @@id([userId, volunteerAppId])
+  @@index([userId])
+  @@index([volunteerAppId])
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
