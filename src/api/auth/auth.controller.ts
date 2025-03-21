@@ -126,14 +126,68 @@ const AuthController = {
 
   registerCharity: async (req: Request, res: Response, next: NextFunction) => {
     try {
-    } catch (error) {
+      const { email, name, password, phone, website, description, location } = req.body;
+
+      const charity = await AuthService.registerCharity({
+        email,
+        name,
+        password,
+        phone,
+        website,
+        description,
+        location,
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Charity registered successfully.',
+        data: {
+          id: charity.id,
+          email: charity.email,
+          name: charity.name,
+          phone: charity.phone,
+        },
+      });
+      return;
+    } catch (error: any) {
+      logger.error(`Charity registration failed: ${error.message}`);
       next(error);
     }
   },
 
   loginCharity: async (req: Request, res: Response, next: NextFunction) => {
     try {
-    } catch (error) {
+      const { email, password } = req.body;
+
+      const { charity, accessToken, refreshToken } = await AuthService.loginCharity(
+        email,
+        password,
+      );
+
+      // Set refresh token in cookie
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+      });
+
+      res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          accessToken,
+          charity: {
+            id: charity.id,
+            email: charity.email,
+            name: charity.name,
+            phone: charity.phone,
+          },
+        },
+      });
+      return;
+    } catch (error: any) {
+      logger.error(`Charity login failed: ${error.message}`);
       next(error);
     }
   },

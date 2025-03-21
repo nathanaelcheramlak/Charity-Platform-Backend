@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import env from '../../config/env';
 import { ApiError } from '../../utils/errors/api-error';
-import { User, PrismaClient } from '@prisma/client';
+import { User, Charity, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -11,6 +11,16 @@ interface RegisterUserData {
   fullname: string;
   phone: string;
   password: string;
+}
+
+interface RegisterCharityData {
+  email: string;
+  name: string;
+  phone: string;
+  password: string;
+  location?: string;
+  description?: string;
+  website?: string;
 }
 
 interface TokenPayload {
@@ -102,6 +112,56 @@ class AuthService {
     } catch (error) {
       throw ApiError.unauthorized('Invalid or expired refresh token');
     }
+  }
+
+  static async registerCharity(charityData: RegisterCharityData): Promise<Charity> {
+    const existingCharity = await prisma.charity.findUnique({
+      where: { email: charityData.email },
+    });
+
+    if (existingCharity) {
+      throw ApiError.badRequest('Email already registered');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(charityData.password, 10);
+
+    const charity = await prisma.charity.create({
+      data: {
+        email: charityData.email,
+        name: charityData.name,
+        password: hashedPassword,
+        phone: charityData.phone,
+        location: charityData.location,
+        description: charityData.description,
+        website: charityData.website,
+      },
+    });
+
+    return charity;
+  }
+
+  static async loginCharity(
+    email: string,
+    password: string,
+  ): Promise<{ charity: Charity; accessToken: string; refreshToken: string }> {
+    const charity = await prisma.charity.findUnique({
+      where: { email },
+    });
+
+    if (!charity) {
+      throw ApiError.badRequest('Invalid credentials');
+    }
+
+    const isPasswordValid = bcrypt.compare(password, charity.password);
+    if (!isPasswordValid) {
+      throw ApiError.badRequest('Invalid credentials');
+    }
+
+    // Generate Token
+    const tokens = this.generateTokens({ id: charity.id, email: charity.email });
+
+    return { charity, ...tokens };
   }
 }
 
