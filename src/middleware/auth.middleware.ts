@@ -7,7 +7,6 @@ import env from '../config/env';
 interface DecodedUser {
   id: string;
   email: string;
-  role?: string;
 }
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {

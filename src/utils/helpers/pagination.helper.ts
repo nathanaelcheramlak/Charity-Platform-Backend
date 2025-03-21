@@ -6,7 +6,7 @@ export interface PaginationQuery {
 
 export const getPaginationParams = (query: PaginationQuery) => {
   const page = parseInt(query.page as string) || 1;
-  const limit = parseInt(query.limit as string) || 10;
+  const limit = parseInt(query.limit as string) || 15;
 
   return {
     page: Math.max(1, page),
