@@ -19,7 +19,7 @@ app.get('/users/me/charities', authMiddleware, UserController.getCharities);
 app.get('/users/me/volunteer-applications', authMiddleware, UserController.myApplications);
 
 // app.post('/', validate(createUserSchema), createUser);
-// app.put('/:id', authMiddleware, validate(updateUserSchema), updateUser);
+app.put('/:id', authMiddleware, validate(updateUserSchema), UserController.updateUser);
 // app.delete('/:id', authMiddleware, deleteUser);
 
 export default app;
