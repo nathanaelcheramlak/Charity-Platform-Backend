@@ -72,7 +72,7 @@ class AuthService {
 
   private static generateTokens(payload: TokenPayload): AuthTokens {
     const accessToken = jwt.sign(payload, env.JWT_SECRET, {
-      expiresIn: parseInt(env.JWT_ACCESS_EXPIRATION, 10),
+      expiresIn: parseInt(env.JWT_ACCESS_EXPIRATION),
     });
 
     const refreshToken = jwt.sign(payload, env.JWT_SECRET, {

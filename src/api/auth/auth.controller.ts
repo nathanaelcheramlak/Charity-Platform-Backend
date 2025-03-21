@@ -1,8 +1,7 @@
 import logger from '../../config/logger';
 import { Request, Response, NextFunction } from 'express';
 import AuthService from './auth.service';
-import { log } from 'console';
-import { ApiError } from '@/utils/errors/api-error';
+import { ApiError } from '../../utils/errors/api-error';
 
 const AuthController = {
   register: async (req: Request, res: Response, next: NextFunction) => {
@@ -79,6 +78,7 @@ const AuthController = {
       if (!token) {
         throw ApiError.unauthorized('Refresh token required');
       }
+
       const { accessToken, refreshToken: newRefreshToken } =
         await AuthService.refreshAccessToken(token);
 
