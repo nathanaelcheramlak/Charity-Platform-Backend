@@ -11,7 +11,7 @@ interface DecodedUser {
 }
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.cookies.token || req.header('Authorization')?.replace('Bearer ', '');
+  const token = req.cookies.refreshToken || req.header('Authorization')?.replace('Bearer ', '');
 
   if (!token) {
     return next(ApiError.unauthorized('Authentication required'));
