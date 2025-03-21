@@ -12,9 +12,9 @@ export default {
   DATABASE_URL: process.env.DATABASE_URL,
 
   // JWT Config
-  JWT_SECRET: process.env.JWT_SECRET || 'your-super-secret-key',
-  JWT_ACCESS_EXPIRATION: process.env.JWT_ACCESS_EXPIRATION || '15m',
-  JWT_REFRESH_EXPIRATION: process.env.JWT_REFRESH_EXPIRATION || '7d',
+  JWT_SECRET: process.env.JWT_SECRET || 'super-secret-key-you-wont-even-guess-it',
+  JWT_ACCESS_EXPIRATION: process.env.JWT_ACCESS_EXPIRATION || '3600',
+  JWT_REFRESH_EXPIRATION: process.env.JWT_REFRESH_EXPIRATION || '7200',
 
   // CORS
   CORS_ORIGIN: process.env.CORS_ORIGIN || '*',

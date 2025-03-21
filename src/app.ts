@@ -9,7 +9,6 @@ import path from 'path';
 import env from './config/env';
 import logger from './config/logger';
 import errorMiddleware from './middleware/error.middleware';
-// Import routes when you create them
 import apiRoutes from './api';
 
 // Initialize express app
@@ -57,8 +56,7 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Not found' });
 });
 
-// Error handling middleware
-// app.use(errorMiddleware);
+app.use(errorMiddleware);
 
 // Start server
 const PORT = env.PORT;
