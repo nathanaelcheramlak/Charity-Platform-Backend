@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import env from '../../config/env';
 import { ApiError } from '../../utils/errors/api-error';
